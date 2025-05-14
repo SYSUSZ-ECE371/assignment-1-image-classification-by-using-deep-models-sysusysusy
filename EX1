@@ -1,0 +1,60 @@
+import os
+import shutil
+import random
+
+# 配置路径和参数
+source_dir = '/content/drive/MyDrive/flower_dataset'  # 原始数据集目录
+target_dir = 'flower_organized'  # 目标目录
+train_ratio = 0.8
+classes = ['daisy', 'dandelion', 'rose', 'sunflower', 'tulip']  # 按顺序的类别名称
+
+# 创建目标目录
+os.makedirs(os.path.join(target_dir, 'train'), exist_ok=True)
+os.makedirs(os.path.join(target_dir, 'val'), exist_ok=True)
+
+# 写入类别文件
+with open(os.path.join(target_dir, 'classes.txt'), 'w') as f:
+    f.write('\n'.join(classes))
+
+# 划分数据集并复制文件
+for cls in classes:
+    cls_dir = os.path.join(source_dir, cls)
+    if not os.path.exists(cls_dir):
+        continue
+
+    images = [img for img in os.listdir(cls_dir) if img.lower().endswith(('.jpg', '.jpeg', '.png'))]
+    random.shuffle(images)
+    split = int(len(images) * train_ratio)
+    train_imgs = images[:split]
+    val_imgs = images[split:]
+
+    # 复制训练集
+    train_cls_path = os.path.join(target_dir, 'train', cls)
+    os.makedirs(train_cls_path, exist_ok=True)
+    for img in train_imgs:
+        shutil.copy(os.path.join(cls_dir, img), os.path.join(train_cls_path, img))
+
+    # 复制验证集
+    val_cls_path = os.path.join(target_dir, 'val', cls)
+    os.makedirs(val_cls_path, exist_ok=True)
+    for img in val_imgs:
+        shutil.copy(os.path.join(cls_dir, img), os.path.join(val_cls_path, img))
+
+# 生成标注文件
+def generate_annotations(data_type):
+    annotations = []
+    base_path = os.path.join(target_dir, data_type)
+    for class_idx, cls in enumerate(classes):
+        cls_path = os.path.join(base_path, cls)
+        for img in os.listdir(cls_path):
+            rel_path = f"{data_type}/{cls}/{img}".replace(os.sep, '/')
+            annotations.append(f"{rel_path} {class_idx}")
+    return annotations
+
+with open(os.path.join(target_dir, 'train.txt'), 'w') as f:
+    f.write('\n'.join(generate_annotations('train')))
+
+with open(os.path.join(target_dir, 'val.txt'), 'w') as f:
+    f.write('\n'.join(generate_annotations('val')))
+
+print("数据集已成功准备！")
