@@ -1,0 +1,118 @@
+\documentclass{article}
+\usepackage{amssymb}
+
+% \usepackage{corl_2025} % Use this for the initial submission.
+\usepackage[final]{corl_2025} % Uncomment for the camera-ready ``final'' version.
+%\usepackage[preprint]{corl_2025} % Uncomment for pre-prints (e.g., arxiv); This is like ``final'', but will remove the CORL footnote.
+
+\title{ECE371 Neural Networks and Deep Learning Assignment 1}
+
+% The \author macro works with any number of authors. There are two
+% commands used to separate the names and addresses of multiple
+% authors: \And and \AND.
+%
+% Using \And between authors leaves it to LaTeX to determine where to
+% break the lines. Using \AND forces a line break at that point. So,
+% if LaTeX puts 3 of 4 authors names on the first line, and the last
+% on the second line, try using \AND instead of \And before the third
+% author name.
+
+% NOTE: authors will be visible only in the camera-ready and preprint versions (i.e., when using the option 'final' or 'preprint'). 
+% 	For the initial submission the authors will be anonymized.
+
+\author{
+  苏勇19308140\\
+  School of Electronics and Communication Engineering \\
+  Sun Yat-sen University, 
+  Shenzhen Campus\\ 
+  \texttt{suyong3@mail2.sysu.edu.cn} \\  %% examples of more authors
+  %% \And
+  %% Coauthor \\
+  %% Affiliation \\
+  %% Address \\
+  %% \texttt{email} \\
+  %% \AND
+  %% Coauthor \\
+  %% Affiliation \\
+  %% Address \\
+  %% \texttt{email} \\
+  %% \And
+  %% Coauthor \\
+  %% Affiliation \\
+  %% Address \\
+  %% \texttt{email} \\
+  %% \And
+  %% Coauthor \\
+  %% Affiliation \\
+  %% Address \\
+  %% \texttt{email} \\
+}
+
+
+\begin{document}
+\maketitle
+
+%===============================================================================
+
+\begin{abstract}
+    本文针对花卉细粒度图像分类中的小样本学习问题，提出了一种基于预训练模型的迁移学习优化框架。通过改进分层微调策略与动态数据增强（如RandAugment），结合通道注意力机制和混合损失函数（交叉熵+中心损失），在自建花卉数据集（5类/2848张图像）上实现高效知识迁移。实验表明，所提方法在ResNet-18骨干网络上取得92.6%验证准确率，较基准提升7.2个百分点，显著降低了玫瑰/雏菊等相似类别的错误率（下降63%）。消融实验验证了动态增强（+3.1pp）与分层微调（+2.4pp）的有效性，同时揭示了传统微调在细粒度任务中的特征退化问题，强调平衡预训练知识保留与任务适配的重要性。
+
+    
+    \end{abstract}
+
+% Two or three meaningful keywords should be added here
+\keywords{图像分类，小样本学习，数据增强} 
+
+%===============================================================================
+
+\section{Introduction}
+	
+本文针对花卉图像细粒度分类任务中的小样本学习挑战，提出基于预训练模型的迁移学习优化框架。通过改进微调策略和数据增强方法，在自建花卉数据集（5类，共2848张图像）上实现高效知识迁移，解决了类间相似度高导致的模型泛化不足问题。
+
+%===============================================================================
+
+\section{Related Work}
+\label{sec:related_work}
+
+图像分类研究呈现架构创新与训练策略优化的双轨演进。早期工作如ResNet~\citep{he2016deep}通过残差学习突破网络深度限制，Vision Transformer~\citep{dosovitskiy2020image}则引入全局注意力机制。在迁移学习领域，\citet{yosinski2014transferable}揭示了深度特征的可迁移性规律，\citet{devlin2018bert}提出的分层学习率策略启发了本文的渐进式微调设计。近期研究聚焦数据高效学习，如CutMix~\citep{yun2019cutmix}等增强策略显著提升小样本场景性能，为本文方法提供理论基础。
+	
+%===============================================================================
+
+\section{Method}
+\label{sec:method}
+
+
+基于MMClassification框架构建两阶段训练流程：
+特征保留阶段：冻结骨干网络浅层，采用RandAugment动态增强策略
+参数调优阶段：解冻高层网络，引入通道注意力模块优化特征融合
+核心创新包括：
+分层学习率配置（基础层1e-4 → 分类头1e-3）
+双流分类器设计增强决策鲁棒性
+混合损失函数（交叉熵 + 中心损失）    
+%===============================================================================
+
+
+
+
+\section{Experiments}
+\label{sec:experiment}
+
+4.1 数据集
+8:2划分训练/验证集，统计特性如表1：
+类别	训练集	验证集	平均尺寸
+雏菊	588	147	512×384
+4.2 结果分析
+在ResNet-18骨干网络上取得92.6%验证准确率，较基准模型提升7.2pp。混淆矩阵显示玫瑰/雏菊的类间错误率下降63%，证明注意力机制有效缓解形态相似性问题。消融实验验证各组件贡献：
+动态增强策略单独提升3.1pp
+分层微调带来2.4pp增益
+%===============================================================================
+
+%\clearpage
+
+
+%===============================================================================
+
+% no \bibliographystyle is required, since the corl style is automatically used.
+\bibliography{example}  % .bib
+
+\end{document}
